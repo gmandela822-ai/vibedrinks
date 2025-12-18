@@ -28,11 +28,19 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 interface OrderWithItems extends Order {
   items: OrderItem[];
   userName?: string;
   userWhatsapp?: string;
+}
+
+interface SelectedIngredient {
+  productId: string;
+  quantity: number;
+  shouldDeductStock: boolean;
 }
 
 export default function Kitchen() {
@@ -43,6 +51,7 @@ export default function Kitchen() {
   const { playOnce, playMultiple } = useNotificationSound();
   const [ingredientSearch, setIngredientSearch] = useState("");
   const [selectedOrderForIngredients, setSelectedOrderForIngredients] = useState<{ orderId: string; itemId: string; categoryName: string } | null>(null);
+  const [selectedIngredients, setSelectedIngredients] = useState<SelectedIngredient[]>([]);
 
   useOrderUpdates({
     onConnected: () => setIsSSEConnected(true),
@@ -118,13 +127,11 @@ export default function Kitchen() {
   });
 
   const addIngredientMutation = useMutation({
-    mutationFn: async ({ orderId, itemId, ingredientProductId, quantity }: { orderId: string; itemId: string; ingredientProductId: string; quantity: number }) => {
-      return apiRequest('POST', `/api/orders/${orderId}/items/${itemId}/ingredients`, { ingredientProductId, quantity });
+    mutationFn: async ({ orderId, itemId, ingredientProductId, quantity, shouldDeductStock }: { orderId: string; itemId: string; ingredientProductId: string; quantity: number; shouldDeductStock: boolean }) => {
+      return apiRequest('POST', `/api/orders/${orderId}/items/${itemId}/ingredients`, { ingredientProductId, quantity, shouldDeductStock });
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/products'] });
-      setSelectedOrderForIngredients(null);
-      setIngredientSearch("");
       toast({ title: 'Ingrediente adicionado!' });
     },
     onError: () => {
@@ -208,26 +215,34 @@ export default function Kitchen() {
     return null;
   };
 
-  const preparedCategoryIds = new Set(
+  // Filtrar APENAS categorias ICES e CERVEJAS
+  const allowedCategoryNames = ["ICES", "CERVEJAS"];
+  const allowedCategoryIds = new Set(
     categories
-      .filter((c: { id: string; name: string }) => isPreparedCategoryName(c.name))
+      .filter((c: { id: string; name: string }) => 
+        allowedCategoryNames.some(name => c.name.toUpperCase().includes(name))
+      )
       .map((c: { id: string; name: string }) => c.id)
   );
 
   const ingredientsToShow = allProducts.filter(p => {
-    const isFromPreparedCategory = preparedCategoryIds.has(p.categoryId);
+    const isFromAllowedCategory = allowedCategoryIds.has(p.categoryId);
     const matchesSearch = p.name.toLowerCase().includes(ingredientSearch.toLowerCase());
     const hasStock = p.stock > 0;
     
-    return matchesSearch && hasStock && !isFromPreparedCategory;
+    return matchesSearch && hasStock && isFromAllowedCategory;
   }).slice(0, 10);
 
   return (
     <div className="min-h-screen bg-background">
       <Dialog open={!!selectedOrderForIngredients} onOpenChange={(open) => {
-        if (!open) setSelectedOrderForIngredients(null);
+        if (!open) {
+          setSelectedOrderForIngredients(null);
+          setSelectedIngredients([]);
+          setIngredientSearch("");
+        }
       }}>
-        <DialogContent>
+        <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Selecione Ingredientes Usados</DialogTitle>
           </DialogHeader>
@@ -246,34 +261,100 @@ export default function Kitchen() {
                     <CommandItem
                       key={product.id}
                       onSelect={() => {
-                        if (selectedOrderForIngredients) {
-                          addIngredientMutation.mutate({
-                            orderId: selectedOrderForIngredients.orderId,
-                            itemId: selectedOrderForIngredients.itemId,
-                            ingredientProductId: product.id,
-                            quantity: 1
-                          });
-                        }
+                        // Toggle ingredient in selected list
+                        setSelectedIngredients(prev => {
+                          const existing = prev.find(ing => ing.productId === product.id);
+                          if (existing) {
+                            return prev.filter(ing => ing.productId !== product.id);
+                          }
+                          return [...prev, { productId: product.id, quantity: 1, shouldDeductStock: true }];
+                        });
                       }}
                       data-testid={`item-ingredient-${product.id}`}
                     >
+                      <Checkbox
+                        checked={selectedIngredients.some(ing => ing.productId === product.id)}
+                        className="mr-2"
+                      />
                       <span>{product.name}</span>
                     </CommandItem>
                   ))}
                 </CommandGroup>
               </CommandList>
             </Command>
+
+            {selectedIngredients.length > 0 && (
+              <div className="space-y-3 pt-4 border-t">
+                <p className="text-sm font-medium">Ingredientes Selecionados:</p>
+                {selectedIngredients.map((ing) => {
+                  const product = allProducts.find(p => p.id === ing.productId);
+                  return (
+                    <div key={ing.productId} className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm">{product?.name}</span>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedIngredients(prev => prev.filter(i => i.productId !== ing.productId))}
+                          data-testid={`button-remove-ingredient-${ing.productId}`}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Checkbox
+                          checked={ing.shouldDeductStock}
+                          onCheckedChange={(checked) => {
+                            setSelectedIngredients(prev =>
+                              prev.map(i =>
+                                i.productId === ing.productId
+                                  ? { ...i, shouldDeductStock: checked as boolean }
+                                  : i
+                              )
+                            );
+                          }}
+                          data-testid={`checkbox-deduct-${ing.productId}`}
+                        />
+                        <Label className="text-xs cursor-pointer">
+                          {ing.shouldDeductStock ? "Usar produto (deduzir estoque)" : "Cancelar uso (sem dedução)"}
+                        </Label>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             <Button
-              variant="outline"
               className="w-full"
               onClick={() => {
-                if (selectedOrderForIngredients) {
+                if (selectedOrderForIngredients && selectedIngredients.length > 0) {
+                  // Submit all selected ingredients
+                  selectedIngredients.forEach(ing => {
+                    addIngredientMutation.mutate({
+                      orderId: selectedOrderForIngredients.orderId,
+                      itemId: selectedOrderForIngredients.itemId,
+                      ingredientProductId: ing.productId,
+                      quantity: ing.quantity,
+                      shouldDeductStock: ing.shouldDeductStock
+                    });
+                  });
+                  // Close dialog
+                  setSelectedOrderForIngredients(null);
+                  setSelectedIngredients([]);
+                  setIngredientSearch("");
+                } else if (selectedOrderForIngredients) {
+                  // No ingredients selected, just proceed to preparing
                   updateStatusMutation.mutate({ orderId: selectedOrderForIngredients.orderId, status: 'preparing' });
+                  setSelectedOrderForIngredients(null);
+                  setSelectedIngredients([]);
+                  setIngredientSearch("");
                 }
               }}
-              data-testid="button-finish-ingredient-selection"
+              disabled={addIngredientMutation.isPending}
+              data-testid="button-confirm-ingredients"
             >
-              Confirmar e Iniciar Produção
+              {selectedIngredients.length > 0 ? `Confirmar ${selectedIngredients.length} ingrediente(s)` : "Continuar sem ingredientes"}
             </Button>
           </div>
         </DialogContent>

@@ -924,7 +924,7 @@ export async function registerRoutes(
   app.post("/api/orders/:orderId/items/:itemId/ingredients", async (req, res) => {
     try {
       const { orderId, itemId } = req.params;
-      const { ingredientProductId, quantity } = req.body;
+      const { ingredientProductId, quantity, shouldDeductStock } = req.body;
       
       if (!ingredientProductId || !quantity) {
         return res.status(400).json({ error: "ingredientProductId and quantity required" });
@@ -936,17 +936,20 @@ export async function registerRoutes(
         quantity: parseInt(quantity)
       });
       
-      const product = await storage.getProduct(ingredientProductId);
-      if (product) {
-        const newStock = Math.max(0, product.stock - quantity);
-        await storage.updateProduct(ingredientProductId, { stock: newStock });
-        await storage.createStockLog({
-          productId: ingredientProductId,
-          previousStock: product.stock,
-          newStock,
-          change: -quantity,
-          reason: `Ingredient used in order ${orderId}`
-        });
+      // Only deduct stock if shouldDeductStock is true
+      if (shouldDeductStock !== false) {
+        const product = await storage.getProduct(ingredientProductId);
+        if (product) {
+          const newStock = Math.max(0, product.stock - quantity);
+          await storage.updateProduct(ingredientProductId, { stock: newStock });
+          await storage.createStockLog({
+            productId: ingredientProductId,
+            previousStock: product.stock,
+            newStock,
+            change: -quantity,
+            reason: `Ingredient used in order ${orderId}`
+          });
+        }
       }
       
       res.json(ingredient);
