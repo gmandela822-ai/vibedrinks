@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { 
@@ -42,7 +42,7 @@ function formatCurrency(value: number | string): string {
 export default function PDV() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { user, role, logout } = useAuth();
+  const { user, role, logout, isHydrated } = useAuth();
   const categoryScrollRef = useRef<HTMLDivElement>(null);
   
   const [cart, setCart] = useState<CartItem[]>([]);
@@ -57,12 +57,16 @@ export default function PDV() {
   const [manualDiscount, setManualDiscount] = useState('');
   const [stockAlertProduct, setStockAlertProduct] = useState<Product | null>(null);
 
+  const isAuthorized = isHydrated && (role === 'pdv' || role === 'admin');
+
   const { data: products = [] } = useQuery<Product[]>({
     queryKey: ['/api/products'],
+    enabled: isAuthorized,
   });
 
   const { data: categories = [] } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
+    enabled: isAuthorized,
   });
 
   const createOrderMutation = useMutation({
@@ -92,9 +96,18 @@ export default function PDV() {
     setLocation('/admin-login');
   };
 
-  if (role !== 'pdv' && role !== 'admin') {
-    setLocation('/admin-login');
-    return null;
+  useEffect(() => {
+    if (isHydrated && role !== 'pdv' && role !== 'admin') {
+      setLocation('/admin-login');
+    }
+  }, [isHydrated, role, setLocation]);
+
+  if (!isHydrated || (role !== 'pdv' && role !== 'admin')) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Carregando...</div>
+      </div>
+    );
   }
 
   const filteredProducts = products.filter(p => {

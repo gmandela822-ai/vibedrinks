@@ -23,7 +23,7 @@ export default function Checkout() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { items, combos, subtotal, comboDiscount, total: cartTotal, clearCart } = useCart();
-  const { user, address, isAuthenticated } = useAuth();
+  const { user, address, isAuthenticated, isHydrated } = useAuth();
 
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('pix');
   const [needsChange, setNeedsChange] = useState(false);
@@ -109,12 +109,12 @@ export default function Checkout() {
 
   const isOpen = isBusinessHoursOpen();
 
-  // Redirect to login if not authenticated or no address
+  // Redirect to login if not authenticated or no address (wait for hydration)
   useEffect(() => {
-    if (!isAuthenticated || !address) {
+    if (isHydrated && (!isAuthenticated || !address)) {
       setLocation('/login?redirect=/checkout');
     }
-  }, [isAuthenticated, address, setLocation]);
+  }, [isAuthenticated, address, setLocation, isHydrated]);
 
   // Redirect to home if cart is empty
   useEffect(() => {

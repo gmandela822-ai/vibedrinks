@@ -864,6 +864,13 @@ export async function registerRoutes(
 
   app.post("/api/orders", async (req, res) => {
     try {
+      const { userId, orderType } = req.body;
+      
+      // Validate userId for delivery orders (not counter/PDV orders)
+      if (orderType !== 'counter' && !userId) {
+        return res.status(401).json({ error: "Usuario nao autenticado. Faca login novamente." });
+      }
+      
       const order = await storage.createOrder(req.body);
       
       if (req.body.items && Array.isArray(req.body.items)) {

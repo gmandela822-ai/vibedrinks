@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { Package, LogOut, Navigation, CheckCircle, Truck, Wifi, WifiOff, MapPinCheck } from 'lucide-react';
@@ -24,8 +24,9 @@ interface OrderWithDetails extends Order {
 export default function MotoboyPage() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { user, role, logout } = useAuth();
+  const { user, role, logout, isHydrated } = useAuth();
   const [isSSEConnected, setIsSSEConnected] = useState(false);
+  const isAuthorized = isHydrated && (role === 'motoboy' || role === 'admin');
   const { playOnce } = useNotificationSound();
 
   useOrderUpdates({
@@ -49,6 +50,7 @@ export default function MotoboyPage() {
 
   const { data: motoboys = [], isLoading: motoboyLoading } = useQuery<Motoboy[]>({
     queryKey: ['/api/motoboys'],
+    enabled: isAuthorized,
   });
 
   const currentMotoboy = motoboys.find(m => m.whatsapp === user?.whatsapp);
@@ -81,10 +83,12 @@ export default function MotoboyPage() {
 
   const { data: addresses = [] } = useQuery<Address[]>({
     queryKey: ['/api/addresses'],
+    enabled: isAuthorized,
   });
 
   const { data: users = [] } = useQuery<{ id: string; name: string; whatsapp: string }[]>({
     queryKey: ['/api/users'],
+    enabled: isAuthorized,
   });
 
   const dispatchedOrders: OrderWithDetails[] = dispatchedOrdersRaw.map(order => ({
@@ -128,9 +132,18 @@ export default function MotoboyPage() {
     window.open(`https://wa.me/55${phone}`, '_blank');
   };
 
-  if (role !== 'motoboy' && role !== 'admin') {
-    setLocation('/admin-login');
-    return null;
+  useEffect(() => {
+    if (isHydrated && role !== 'motoboy' && role !== 'admin') {
+      setLocation('/admin-login');
+    }
+  }, [isHydrated, role, setLocation]);
+
+  if (!isHydrated || (role !== 'motoboy' && role !== 'admin')) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Carregando...</div>
+      </div>
+    );
   }
 
   const renderOrderActions = (order: OrderWithDetails) => {

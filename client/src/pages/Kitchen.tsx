@@ -46,8 +46,9 @@ interface SelectedIngredient {
 export default function Kitchen() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
-  const { role, logout } = useAuth();
+  const { role, logout, isHydrated } = useAuth();
   const [isSSEConnected, setIsSSEConnected] = useState(false);
+  const isAuthorized = isHydrated && (role === 'kitchen' || role === 'admin');
   const { playOnce, playMultiple } = useNotificationSound();
   const [ingredientSearch, setIngredientSearch] = useState("");
   const [selectedOrderForIngredients, setSelectedOrderForIngredients] = useState<{ orderId: string; itemId: string; categoryName: string } | null>(null);
@@ -75,18 +76,22 @@ export default function Kitchen() {
   const { data: orders = [], isLoading, refetch } = useQuery<Order[]>({
     queryKey: ['/api/orders'],
     refetchInterval: isSSEConnected ? 30000 : 5000,
+    enabled: isAuthorized,
   });
 
   const { data: users = [] } = useQuery<{ id: string; name: string; whatsapp: string }[]>({
     queryKey: ['/api/users'],
+    enabled: isAuthorized,
   });
 
   const { data: allProducts = [] } = useQuery<Product[]>({
     queryKey: ['/api/products'],
+    enabled: isAuthorized,
   });
 
   const { data: categories = [] } = useQuery<{ id: string; name: string }[]>({
     queryKey: ['/api/categories'],
+    enabled: isAuthorized,
   });
 
   const orderIds = orders.map(o => o.id).join(',');
@@ -99,7 +104,7 @@ export default function Kitchen() {
       if (!res.ok) return [];
       return res.json();
     },
-    enabled: orders.length > 0,
+    enabled: isAuthorized && orders.length > 0,
     refetchInterval: isSSEConnected ? 30000 : 5000,
   });
 
@@ -144,9 +149,18 @@ export default function Kitchen() {
     setLocation('/admin-login');
   };
 
-  if (role !== 'kitchen' && role !== 'admin') {
-    setLocation('/admin-login');
-    return null;
+  useEffect(() => {
+    if (isHydrated && role !== 'kitchen' && role !== 'admin') {
+      setLocation('/admin-login');
+    }
+  }, [isHydrated, role, setLocation]);
+
+  if (!isHydrated || (role !== 'kitchen' && role !== 'admin')) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Carregando...</div>
+      </div>
+    );
   }
 
   const acceptedOrders = ordersWithItems.filter(o => o.status === 'accepted');

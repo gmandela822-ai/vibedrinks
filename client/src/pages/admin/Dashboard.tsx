@@ -5051,7 +5051,7 @@ export default function AdminDashboard() {
   const [showFinanceiroDialog, setShowFinanceiroDialog] = useState(false);
   const [financeiroPassword, setFinanceiroPassword] = useState('');
   const [financeiroError, setFinanceiroError] = useState('');
-  const { user, role, logout } = useAuth();
+  const { user, role, logout, isHydrated } = useAuth();
   const [, setLocation] = useLocation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
@@ -5097,9 +5097,18 @@ export default function AdminDashboard() {
     },
   });
 
-  if (role !== 'admin') {
-    setLocation('/admin-login');
-    return null;
+  useEffect(() => {
+    if (isHydrated && role !== 'admin') {
+      setLocation('/admin-login');
+    }
+  }, [isHydrated, role, setLocation]);
+
+  if (!isHydrated || role !== 'admin') {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-pulse text-muted-foreground">Carregando...</div>
+      </div>
+    );
   }
 
   const scrollTabs = (direction: 'left' | 'right') => {
