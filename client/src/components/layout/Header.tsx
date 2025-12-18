@@ -103,12 +103,19 @@ export function Header({ onCartOpen }: HeaderProps) {
               </Button>
             )}
 
-            <Link 
-              href="/admin-login" 
-              className="text-yellow-400 hover:text-yellow-300 transition-all p-2 drop-shadow hover:drop-shadow-md"
+            <Button
+              variant="ghost"
+              size="icon"
+              className="bg-gray-900 text-yellow-400 hover:bg-gray-950 hover:text-yellow-300 transition-all drop-shadow-md hover:drop-shadow-lg active:drop-shadow-sm"
+              onClick={() => setLocation('/admin-login')}
+              data-testid="button-admin-login"
+              style={{ 
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 -3px 8px rgba(0, 0, 0, 0.2)',
+                transition: 'all 0.2s ease'
+              }}
             >
-              <Settings className="h-4 w-4 drop-shadow" />
-            </Link>
+              <Settings className="h-5 w-5 drop-shadow" />
+            </Button>
 
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
