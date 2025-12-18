@@ -106,15 +106,15 @@ export function Header({ onCartOpen }: HeaderProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="bg-gray-900 text-yellow-400 hover:bg-gray-950 hover:text-yellow-300 transition-all drop-shadow-md hover:drop-shadow-lg active:drop-shadow-sm"
+              className="bg-gray-900 text-yellow-400 hover:bg-gray-950 hover:text-yellow-300 transition-all drop-shadow-xl hover:drop-shadow-2xl active:drop-shadow-lg"
               onClick={() => setLocation('/admin-login')}
               data-testid="button-admin-login"
               style={{ 
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 -3px 8px rgba(0, 0, 0, 0.2)',
+                boxShadow: '0 6px 16px rgba(0, 0, 0, 0.5), inset 0 -4px 10px rgba(0, 0, 0, 0.3), 0 0px 8px rgba(255, 215, 0, 0.3)',
                 transition: 'all 0.2s ease'
               }}
             >
-              <Settings className="h-5 w-5 drop-shadow" />
+              <Settings className="h-6 w-6" style={{ filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4)) drop-shadow(0 0px 4px rgba(255, 215, 0, 0.5))' }} />
             </Button>
 
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
