@@ -34,8 +34,9 @@ export function Header({ onCartOpen }: HeaderProps) {
             <img 
               src={logoImage} 
               alt="Vibe Drinks" 
-              className="h-10 w-auto hover:opacity-80 transition-opacity drop-shadow-md"
+              className="h-10 w-auto hover:opacity-90 transition-opacity drop-shadow-lg"
               data-testid="img-logo"
+              style={{ filter: 'drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35)) drop-shadow(0 0px 8px rgba(0, 0, 0, 0.2))' }}
             />
           </Link>
 
@@ -43,11 +44,11 @@ export function Header({ onCartOpen }: HeaderProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="relative text-gray-900 hover:text-black hover:bg-yellow-300 transition-all drop-shadow-md hover:drop-shadow-lg active:drop-shadow-sm"
+              className="relative bg-gray-900 text-yellow-400 hover:bg-gray-950 hover:text-yellow-300 transition-all drop-shadow-md hover:drop-shadow-lg active:drop-shadow-sm"
               onClick={onCartOpen}
               data-testid="button-cart"
               style={{ 
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25), inset 0 -3px 8px rgba(0, 0, 0, 0.1)',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 -3px 8px rgba(0, 0, 0, 0.2)',
                 transition: 'all 0.2s ease'
               }}
             >
@@ -76,11 +77,11 @@ export function Header({ onCartOpen }: HeaderProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-gray-900 hover:text-black hover:bg-yellow-300 transition-all drop-shadow-md hover:drop-shadow-lg active:drop-shadow-sm"
+                className="bg-gray-900 text-yellow-400 hover:bg-gray-950 hover:text-yellow-300 transition-all drop-shadow-md hover:drop-shadow-lg active:drop-shadow-sm"
                 onClick={() => setLocation('/perfil')}
                 data-testid="button-profile"
                 style={{ 
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25), inset 0 -3px 8px rgba(0, 0, 0, 0.1)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 -3px 8px rgba(0, 0, 0, 0.2)',
                   transition: 'all 0.2s ease'
                 }}
               >
@@ -90,11 +91,11 @@ export function Header({ onCartOpen }: HeaderProps) {
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-gray-900 font-medium hover:bg-yellow-300 transition-all drop-shadow-md hover:drop-shadow-lg active:drop-shadow-sm"
+                className="bg-gray-900 text-yellow-400 font-medium hover:bg-gray-950 hover:text-yellow-300 transition-all drop-shadow-md hover:drop-shadow-lg active:drop-shadow-sm"
                 onClick={() => setLocation('/login')}
                 data-testid="button-login"
                 style={{ 
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25), inset 0 -3px 8px rgba(0, 0, 0, 0.1)',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 -3px 8px rgba(0, 0, 0, 0.2)',
                   transition: 'all 0.2s ease'
                 }}
               >
@@ -104,7 +105,7 @@ export function Header({ onCartOpen }: HeaderProps) {
 
             <Link 
               href="/admin-login" 
-              className="text-gray-700 hover:text-gray-900 transition-all p-2 drop-shadow hover:drop-shadow-md"
+              className="text-yellow-400 hover:text-yellow-300 transition-all p-2 drop-shadow hover:drop-shadow-md"
             >
               <Settings className="h-4 w-4 drop-shadow" />
             </Link>
@@ -114,10 +115,10 @@ export function Header({ onCartOpen }: HeaderProps) {
                 <Button 
                   variant="ghost" 
                   size="icon" 
-                  className="text-gray-900 hover:bg-yellow-300 transition-all drop-shadow-md hover:drop-shadow-lg active:drop-shadow-sm" 
+                  className="bg-gray-900 text-yellow-400 hover:bg-gray-950 hover:text-yellow-300 transition-all drop-shadow-md hover:drop-shadow-lg active:drop-shadow-sm" 
                   data-testid="button-menu"
                   style={{ 
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.25), inset 0 -3px 8px rgba(0, 0, 0, 0.1)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 -3px 8px rgba(0, 0, 0, 0.2)',
                     transition: 'all 0.2s ease'
                   }}
                 >
