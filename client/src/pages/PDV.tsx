@@ -96,6 +96,18 @@ export default function PDV() {
     setLocation('/admin-login');
   };
 
+  const handleNoteChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setNotes(e.target.value);
+  }, []);
+
+  const handleDiscountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setManualDiscount(e.target.value);
+  }, []);
+
+  const handleSalespersonChange = useCallback((value: string) => {
+    setSalesperson(value as Salesperson);
+  }, []);
+
   useEffect(() => {
     if (isHydrated && role !== 'pdv' && role !== 'admin') {
       setLocation('/admin-login');
@@ -235,18 +247,6 @@ export default function PDV() {
       });
     }
   };
-
-  const handleNoteChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setNotes(e.target.value);
-  }, []);
-
-  const handleDiscountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setManualDiscount(e.target.value);
-  }, []);
-
-  const handleSalespersonChange = useCallback((value: string) => {
-    setSalesperson(value as Salesperson);
-  }, []);
 
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
