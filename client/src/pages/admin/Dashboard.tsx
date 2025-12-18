@@ -2623,6 +2623,7 @@ function ProductItem({
   isTogglingCombo,
   formatCurrency,
   isPrepared,
+  onImageClick,
 }: { 
   product: Product; 
   category: Category | undefined;
@@ -2632,6 +2633,7 @@ function ProductItem({
   isTogglingCombo: boolean;
   formatCurrency: (value: number | string) => string;
   isPrepared: boolean;
+  onImageClick?: (productId: string) => void;
 }) {
   return (
     <Card 
@@ -2639,13 +2641,21 @@ function ProductItem({
     >
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
-          {product.imageUrl ? (
-            <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-contain rounded-lg bg-white/10 flex-shrink-0" />
-          ) : (
-            <div className="w-16 h-16 rounded-lg bg-secondary flex items-center justify-center flex-shrink-0">
-              <ShoppingBag className="w-6 h-6 text-muted-foreground" />
+          <div 
+            className="relative cursor-pointer group flex-shrink-0"
+            onClick={() => onImageClick?.(product.id)}
+          >
+            {product.imageUrl ? (
+              <img src={product.imageUrl} alt={product.name} className="w-16 h-16 object-contain rounded-lg bg-white/10" />
+            ) : (
+              <div className="w-16 h-16 rounded-lg bg-secondary flex items-center justify-center">
+                <ShoppingBag className="w-6 h-6 text-muted-foreground" />
+              </div>
+            )}
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">
+              <Upload className="w-4 h-4 text-white" />
             </div>
-          )}
+          </div>
           <div className="flex-1 min-w-0">
             <h3 className="font-semibold truncate">{product.name}</h3>
             {category && (
@@ -2765,6 +2775,8 @@ function ProdutosTab() {
   } | null>(null);
   const csvInputRef = useRef<HTMLInputElement>(null);
   const tableImageInputRef = useRef<HTMLInputElement>(null);
+  const cardImageInputRef = useRef<HTMLInputElement>(null);
+  const [editingCardProductId, setEditingCardProductId] = useState<string | null>(null);
 
   const handleOpenDialog = (product: Product | null) => {
     setEditingProduct(product);
@@ -3012,6 +3024,61 @@ function ProdutosTab() {
 
     if (tableImageInputRef.current) {
       tableImageInputRef.current.value = '';
+    }
+  };
+
+  const handleCardImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !editingCardProductId) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Erro', description: 'Selecione uma imagem valida', variant: 'destructive' });
+      return;
+    }
+
+    const saved = localStorage.getItem('vibe-drinks-user');
+    let userId = null;
+    if (saved) {
+      try {
+        const user = JSON.parse(saved);
+        userId = user.id;
+      } catch {}
+    }
+
+    if (!userId) {
+      toast({ title: 'Erro', description: 'Usuario nao autenticado', variant: 'destructive' });
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('folder', 'products');
+
+    try {
+      const response = await fetch('/api/storage/upload', {
+        method: 'POST',
+        headers: {
+          'x-user-id': userId,
+        },
+        body: formData,
+      });
+      const result = await response.json();
+      if (response.ok && result.publicUrl) {
+        updateMutation.mutate({
+          id: editingCardProductId,
+          data: { imageUrl: result.publicUrl },
+        });
+        toast({ title: 'Imagem carregada!' });
+      } else {
+        toast({ title: 'Erro', description: result.error || 'Falha no upload', variant: 'destructive' });
+      }
+    } catch (error) {
+      toast({ title: 'Erro ao carregar imagem', variant: 'destructive' });
+    }
+
+    setEditingCardProductId(null);
+    if (cardImageInputRef.current) {
+      cardImageInputRef.current.value = '';
     }
   };
 
@@ -3361,6 +3428,13 @@ function ProdutosTab() {
             
             {viewMode === 'cards' ? (
               <div className={`grid gap-4 ${gridClass}`}>
+                <input
+                  type="file"
+                  ref={cardImageInputRef}
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleCardImageUpload}
+                />
                 {sortedProducts.map(product => {
                   const category = categories.find(c => c.id === product.categoryId);
                   const isPrepared = category ? isPreparedCategory(category.name) : false;
@@ -3375,6 +3449,10 @@ function ProdutosTab() {
                       isTogglingCombo={toggleComboEligibleMutation.isPending}
                       formatCurrency={formatCurrency}
                       isPrepared={isPrepared}
+                      onImageClick={(productId) => {
+                        setEditingCardProductId(productId);
+                        cardImageInputRef.current?.click();
+                      }}
                     />
                   );
                 })}
