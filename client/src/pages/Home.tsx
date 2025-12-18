@@ -64,10 +64,10 @@ export default function Home() {
     : selectedCategory;
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
+    <div className="min-h-screen bg-background">
       <Header onCartOpen={() => setCartOpen(true)} />
       
-      <main className="flex-1 overflow-y-auto">
+      <main>
         <HeroSection />
         
         <BannerCarousel banners={banners} />
