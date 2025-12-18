@@ -27,16 +27,15 @@ export function Header({ onCartOpen }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-gradient-to-r from-yellow-400 to-yellow-500 backdrop-blur-xl border-none shadow-2xl" style={{ boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3), 0 0px 12px rgba(255, 215, 0, 0.4)' }}>
+    <header className="sticky top-0 z-50 bg-black/90 backdrop-blur-xl border-b border-primary/10">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16 gap-4">
           <Link href="/" className="flex items-center gap-3 group">
             <img 
               src={logoImage} 
               alt="Vibe Drinks" 
-              className="h-10 w-auto hover:opacity-90 transition-opacity drop-shadow-lg"
+              className="h-10 w-auto hover:opacity-80 transition-opacity"
               data-testid="img-logo"
-              style={{ filter: 'drop-shadow(0 6px 16px rgba(0, 0, 0, 0.35)) drop-shadow(0 0px 8px rgba(0, 0, 0, 0.2))' }}
             />
           </Link>
 
@@ -44,15 +43,11 @@ export function Header({ onCartOpen }: HeaderProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="relative bg-gray-900 text-yellow-400 hover:bg-gray-950 hover:text-yellow-300 transition-all drop-shadow-md hover:drop-shadow-lg active:drop-shadow-sm"
+              className="relative text-white/80 hover:text-primary hover:bg-primary/10"
               onClick={onCartOpen}
               data-testid="button-cart"
-              style={{ 
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 -3px 8px rgba(0, 0, 0, 0.2)',
-                transition: 'all 0.2s ease'
-              }}
             >
-              <ShoppingCart className="h-5 w-5 drop-shadow" />
+              <ShoppingCart className="h-5 w-5" />
               <AnimatePresence>
                 {itemCount > 0 && (
                   <motion.div
@@ -62,9 +57,8 @@ export function Header({ onCartOpen }: HeaderProps) {
                     className="absolute -top-1 -right-1"
                   >
                     <Badge 
-                      className="h-5 min-w-5 flex items-center justify-center p-0 px-1 bg-red-500 text-white text-xs font-bold border-none drop-shadow-lg"
+                      className="h-5 min-w-5 flex items-center justify-center p-0 px-1 bg-gradient-to-r from-amber-500 to-yellow-500 text-black text-xs font-bold border-none"
                       data-testid="badge-cart-count"
-                      style={{ boxShadow: '0 4px 12px rgba(239, 68, 68, 0.4)' }}
                     >
                       {itemCount}
                     </Badge>
@@ -77,74 +71,50 @@ export function Header({ onCartOpen }: HeaderProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="bg-gray-900 text-yellow-400 hover:bg-gray-950 hover:text-yellow-300 transition-all drop-shadow-md hover:drop-shadow-lg active:drop-shadow-sm"
+                className="text-white/80 hover:text-primary hover:bg-primary/10"
                 onClick={() => setLocation('/perfil')}
                 data-testid="button-profile"
-                style={{ 
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 -3px 8px rgba(0, 0, 0, 0.2)',
-                  transition: 'all 0.2s ease'
-                }}
               >
-                <User className="h-5 w-5 drop-shadow" />
+                <User className="h-5 w-5" />
               </Button>
             ) : (
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                className="bg-gray-900 text-yellow-400 font-medium hover:bg-gray-950 hover:text-yellow-300 transition-all drop-shadow-md hover:drop-shadow-lg active:drop-shadow-sm"
+                className="text-primary border-primary/40 hover:bg-primary/10 hover:border-primary font-medium"
                 onClick={() => setLocation('/login')}
                 data-testid="button-login"
-                style={{ 
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 -3px 8px rgba(0, 0, 0, 0.2)',
-                  transition: 'all 0.2s ease'
-                }}
               >
                 Entrar
               </Button>
             )}
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className="bg-gray-900 text-yellow-400 hover:bg-gray-950 hover:text-yellow-300 transition-all drop-shadow-xl hover:drop-shadow-2xl active:drop-shadow-lg"
-              onClick={() => setLocation('/admin-login')}
-              data-testid="button-admin-login"
-              style={{ 
-                boxShadow: '0 6px 16px rgba(0, 0, 0, 0.5), inset 0 -4px 10px rgba(0, 0, 0, 0.3), 0 0px 8px rgba(255, 215, 0, 0.3)',
-                transition: 'all 0.2s ease'
-              }}
+            <Link 
+              href="/admin-login" 
+              className="text-muted-foreground/30 hover:text-primary/50 transition-colors p-2"
             >
-              <Settings className="h-6 w-6" style={{ filter: 'drop-shadow(0 4px 8px rgba(0, 0, 0, 0.4)) drop-shadow(0 0px 4px rgba(255, 215, 0, 0.5))' }} />
-            </Button>
+              <Settings className="h-4 w-4" />
+            </Link>
 
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="bg-gray-900 text-yellow-400 hover:bg-gray-950 hover:text-yellow-300 transition-all drop-shadow-md hover:drop-shadow-lg active:drop-shadow-sm" 
-                  data-testid="button-menu"
-                  style={{ 
-                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4), inset 0 -3px 8px rgba(0, 0, 0, 0.2)',
-                    transition: 'all 0.2s ease'
-                  }}
-                >
-                  <Menu className="h-5 w-5 drop-shadow" />
+                <Button variant="ghost" size="icon" className="text-white/80" data-testid="button-menu">
+                  <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="bg-gray-900 border-yellow-400/30 backdrop-blur-xl w-80">
+              <SheetContent side="right" className="bg-black/95 border-primary/20 backdrop-blur-xl w-80">
                 <SheetHeader>
                   <SheetTitle className="sr-only">Menu</SheetTitle>
                 </SheetHeader>
                 <div className="flex flex-col h-full pt-8">
                   <div className="flex items-center justify-between mb-8">
-                    <img src={logoImage} alt="Vibe Drinks" className="h-8 drop-shadow-lg" />
+                    <img src={logoImage} alt="Vibe Drinks" className="h-8" />
                   </div>
 
                   {isAuthenticated && (
                     <div className="space-y-1 mb-8">
-                      <p className="text-sm text-gray-400 drop-shadow">Bem-vindo,</p>
-                      <p className="text-lg font-semibold text-yellow-400 drop-shadow-md">{user?.name}</p>
+                      <p className="text-sm text-muted-foreground">Bem-vindo,</p>
+                      <p className="text-lg font-semibold text-primary">{user?.name}</p>
                     </div>
                   )}
 
@@ -153,42 +123,38 @@ export function Header({ onCartOpen }: HeaderProps) {
                       <>
                         <Link 
                           href="/perfil" 
-                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-yellow-500/10 transition-all drop-shadow-sm hover:drop-shadow-md"
+                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-primary/10 transition-colors"
                           onClick={() => setMobileMenuOpen(false)}
                           data-testid="link-profile-mobile"
-                          style={{ boxShadow: 'inset 0 -2px 4px rgba(0, 0, 0, 0.2)' }}
                         >
-                          <User className="h-5 w-5 text-yellow-400 drop-shadow" />
+                          <User className="h-5 w-5 text-primary" />
                           Meu Perfil
                         </Link>
                         <Link 
                           href="/pedidos" 
-                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-yellow-500/10 transition-all drop-shadow-sm hover:drop-shadow-md"
+                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-primary/10 transition-colors"
                           onClick={() => setMobileMenuOpen(false)}
                           data-testid="link-orders-mobile"
-                          style={{ boxShadow: 'inset 0 -2px 4px rgba(0, 0, 0, 0.2)' }}
                         >
-                          <ShoppingCart className="h-5 w-5 text-yellow-400 drop-shadow" />
+                          <ShoppingCart className="h-5 w-5 text-primary" />
                           Meus Pedidos
                         </Link>
                         
-                        <div className="my-4 border-t border-yellow-400/10" />
+                        <div className="my-4 border-t border-primary/10" />
                         
                         <Button 
                           variant="ghost" 
-                          className="justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10 drop-shadow-sm hover:drop-shadow-md transition-all"
+                          className="justify-start text-red-400 hover:text-red-300 hover:bg-red-500/10"
                           onClick={() => { logout(); setMobileMenuOpen(false); }}
-                          style={{ boxShadow: 'inset 0 -2px 4px rgba(0, 0, 0, 0.2)' }}
                         >
-                          <X className="h-5 w-5 mr-3 drop-shadow" />
+                          <X className="h-5 w-5 mr-3" />
                           Sair da conta
                         </Button>
                       </>
                     ) : (
                       <Button
-                        className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-semibold hover:from-yellow-500 hover:to-yellow-600 drop-shadow-lg hover:drop-shadow-xl transition-all"
+                        className="bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-semibold"
                         onClick={() => { setLocation('/login'); setMobileMenuOpen(false); }}
-                        style={{ boxShadow: '0 6px 16px rgba(0, 0, 0, 0.3), inset 0 -3px 8px rgba(0, 0, 0, 0.15)' }}
                       >
                         Entrar ou Cadastrar
                       </Button>
@@ -196,13 +162,12 @@ export function Header({ onCartOpen }: HeaderProps) {
                   </nav>
 
                   {itemCount > 0 && (
-                    <div className="mt-auto pt-8 border-t border-yellow-400/10">
+                    <div className="mt-auto pt-8 border-t border-primary/10">
                       <Button
-                        className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-semibold hover:from-yellow-500 hover:to-yellow-600 drop-shadow-lg hover:drop-shadow-xl transition-all"
+                        className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-semibold"
                         onClick={() => { onCartOpen(); setMobileMenuOpen(false); }}
-                        style={{ boxShadow: '0 6px 16px rgba(0, 0, 0, 0.3), inset 0 -3px 8px rgba(0, 0, 0, 0.15)' }}
                       >
-                        <ShoppingCart className="h-4 w-4 mr-2 drop-shadow" />
+                        <ShoppingCart className="h-4 w-4 mr-2" />
                         Ver Carrinho ({itemCount}) - {formatPrice(subtotal)}
                       </Button>
                     </div>
