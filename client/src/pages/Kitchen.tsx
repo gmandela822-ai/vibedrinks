@@ -215,23 +215,23 @@ export default function Kitchen() {
     return null;
   };
 
-  // Filtrar APENAS categorias ICE e CERVEJAS
-  const allowedCategoryNames = ["ICE", "CERVEJAS"];
+  // Filtrar APENAS categorias ICE e CERVEJAS - casos específicos
   const allowedCategoryIds = new Set(
     categories
-      .filter((c: { id: string; name: string }) => 
-        allowedCategoryNames.some(name => c.name.toUpperCase().includes(name))
-      )
+      .filter((c: { id: string; name: string }) => {
+        const nameLower = c.name.toLowerCase();
+        return nameLower === "ice" || nameLower === "cervejas";
+      })
       .map((c: { id: string; name: string }) => c.id)
   );
 
   const ingredientsToShow = allProducts.filter(p => {
     const isFromAllowedCategory = allowedCategoryIds.has(p.categoryId);
-    const matchesSearch = p.name.toLowerCase().includes(ingredientSearch.toLowerCase());
+    const matchesSearch = ingredientSearch === "" || p.name.toLowerCase().includes(ingredientSearch.toLowerCase());
     const hasStock = p.stock > 0;
     
-    return matchesSearch && hasStock && isFromAllowedCategory;
-  }).slice(0, 10);
+    return hasStock && isFromAllowedCategory && matchesSearch;
+  }).slice(0, 20);
 
   return (
     <div className="min-h-screen bg-background">
@@ -242,94 +242,112 @@ export default function Kitchen() {
           setIngredientSearch("");
         }
       }}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-2xl max-h-[85vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Selecione Ingredientes Usados</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="flex flex-col gap-4 flex-1 overflow-hidden">
             <Input
-              placeholder="Procurar ingrediente..."
+              placeholder="Procurar ingrediente (cerveja, ice, etc)..."
               value={ingredientSearch}
               onChange={(e) => setIngredientSearch(e.target.value)}
               data-testid="input-ingredient-search"
             />
-            <Command>
-              <CommandList>
-                <CommandEmpty>Nenhum ingrediente encontrado</CommandEmpty>
-                <CommandGroup>
-                  {ingredientsToShow.map((product) => (
-                    <CommandItem
-                      key={product.id}
-                      onSelect={() => {
-                        // Toggle ingredient in selected list
-                        setSelectedIngredients(prev => {
-                          const existing = prev.find(ing => ing.productId === product.id);
-                          if (existing) {
-                            return prev.filter(ing => ing.productId !== product.id);
-                          }
-                          return [...prev, { productId: product.id, quantity: 1, shouldDeductStock: true }];
-                        });
-                      }}
-                      data-testid={`item-ingredient-${product.id}`}
-                    >
-                      <Checkbox
-                        checked={selectedIngredients.some(ing => ing.productId === product.id)}
-                        className="mr-2"
-                      />
-                      <span>{product.name}</span>
-                    </CommandItem>
-                  ))}
-                </CommandGroup>
-              </CommandList>
-            </Command>
-
-            {selectedIngredients.length > 0 && (
-              <div className="space-y-3 pt-4 border-t">
-                <p className="text-sm font-medium">Ingredientes Selecionados:</p>
-                {selectedIngredients.map((ing) => {
-                  const product = allProducts.find(p => p.id === ing.productId);
-                  return (
-                    <div key={ing.productId} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm">{product?.name}</span>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedIngredients(prev => prev.filter(i => i.productId !== ing.productId))}
-                          data-testid={`button-remove-ingredient-${ing.productId}`}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Checkbox
-                          checked={ing.shouldDeductStock}
-                          onCheckedChange={(checked) => {
-                            setSelectedIngredients(prev =>
-                              prev.map(i =>
-                                i.productId === ing.productId
-                                  ? { ...i, shouldDeductStock: checked as boolean }
-                                  : i
-                              )
-                            );
-                          }}
-                          data-testid={`checkbox-deduct-${ing.productId}`}
-                        />
-                        <Label className="text-xs cursor-pointer">
-                          {ing.shouldDeductStock ? "Usar produto (deduzir estoque)" : "Cancelar uso (sem dedução)"}
-                        </Label>
-                      </div>
+            
+            <div className="flex gap-4 flex-1 overflow-hidden min-h-0">
+              {/* Left side: Available ingredients */}
+              <div className="flex-1 flex flex-col min-h-0">
+                <p className="text-sm font-medium mb-2">Disponíveis:</p>
+                <div className="flex-1 overflow-y-auto border rounded-md p-2">
+                  {ingredientsToShow.length === 0 ? (
+                    <div className="text-center text-muted-foreground text-sm py-4">
+                      Nenhum ingrediente encontrado
                     </div>
-                  );
-                })}
+                  ) : (
+                    <div className="space-y-1">
+                      {ingredientsToShow.map((product) => (
+                        <div
+                          key={product.id}
+                          className="flex items-center gap-2 p-2 rounded hover:bg-muted cursor-pointer"
+                          onClick={() => {
+                            setSelectedIngredients(prev => {
+                              const existing = prev.find(ing => ing.productId === product.id);
+                              if (existing) {
+                                return prev.filter(ing => ing.productId !== product.id);
+                              }
+                              return [...prev, { productId: product.id, quantity: 1, shouldDeductStock: true }];
+                            });
+                          }}
+                          data-testid={`item-ingredient-${product.id}`}
+                        >
+                          <Checkbox
+                            checked={selectedIngredients.some(ing => ing.productId === product.id)}
+                            className="mr-2"
+                          />
+                          <span className="text-sm flex-1">{product.name}</span>
+                          <span className="text-xs text-muted-foreground">{product.stock} un</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
+
+              {/* Right side: Selected ingredients */}
+              <div className="w-64 flex flex-col min-h-0">
+                <p className="text-sm font-medium mb-2">Selecionados:</p>
+                <div className="flex-1 overflow-y-auto border rounded-md p-2 space-y-2">
+                  {selectedIngredients.length === 0 ? (
+                    <div className="text-center text-muted-foreground text-xs py-4">
+                      Selecione ingredientes
+                    </div>
+                  ) : (
+                    selectedIngredients.map((ing) => {
+                      const product = allProducts.find(p => p.id === ing.productId);
+                      return (
+                        <div key={ing.productId} className="p-2 border rounded-sm bg-card">
+                          <div className="flex items-center justify-between gap-1 mb-1">
+                            <span className="text-xs font-medium truncate">{product?.name}</span>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="h-6 w-6 p-0"
+                              onClick={() => setSelectedIngredients(prev => prev.filter(i => i.productId !== ing.productId))}
+                              data-testid={`button-remove-ingredient-${ing.productId}`}
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Checkbox
+                              checked={ing.shouldDeductStock}
+                              onCheckedChange={(checked) => {
+                                setSelectedIngredients(prev =>
+                                  prev.map(i =>
+                                    i.productId === ing.productId
+                                      ? { ...i, shouldDeductStock: checked as boolean }
+                                      : i
+                                  )
+                                );
+                              }}
+                              data-testid={`checkbox-deduct-${ing.productId}`}
+                            />
+                            <Label className="text-xs cursor-pointer">
+                              {ing.shouldDeductStock ? "Usar" : "Cancelar"}
+                            </Label>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
 
             <Button
               className="w-full"
               onClick={() => {
                 if (selectedOrderForIngredients && selectedIngredients.length > 0) {
-                  // Submit all selected ingredients
                   selectedIngredients.forEach(ing => {
                     addIngredientMutation.mutate({
                       orderId: selectedOrderForIngredients.orderId,
@@ -339,12 +357,10 @@ export default function Kitchen() {
                       shouldDeductStock: ing.shouldDeductStock
                     });
                   });
-                  // Close dialog
                   setSelectedOrderForIngredients(null);
                   setSelectedIngredients([]);
                   setIngredientSearch("");
                 } else if (selectedOrderForIngredients) {
-                  // No ingredients selected, just proceed to preparing
                   updateStatusMutation.mutate({ orderId: selectedOrderForIngredients.orderId, status: 'preparing' });
                   setSelectedOrderForIngredients(null);
                   setSelectedIngredients([]);
