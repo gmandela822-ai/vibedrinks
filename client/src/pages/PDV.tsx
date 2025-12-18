@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { 
@@ -231,6 +231,18 @@ export default function PDV() {
     }
   };
 
+  const handleNoteChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setNotes(e.target.value);
+  }, []);
+
+  const handleDiscountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setManualDiscount(e.target.value);
+  }, []);
+
+  const handleSalespersonChange = useCallback((value: string) => {
+    setSalesperson(value as Salesperson);
+  }, []);
+
   const CartContent = () => (
     <div className="flex flex-col h-full">
       <div className="p-3 border-b border-border">
@@ -238,7 +250,7 @@ export default function PDV() {
           <User className="h-4 w-4 text-muted-foreground flex-shrink-0" />
           <Select 
             value={salesperson || undefined} 
-            onValueChange={(value) => setSalesperson(value as Salesperson)}
+            onValueChange={handleSalespersonChange}
           >
             <SelectTrigger className="bg-secondary border-primary/30 text-sm" data-testid="select-salesperson">
               <SelectValue placeholder="Selecione o Balconista" />
@@ -315,7 +327,7 @@ export default function PDV() {
         <Input
           placeholder="Observações..."
           value={notes}
-          onChange={(e) => setNotes(e.target.value)}
+          onChange={handleNoteChange}
           className="bg-secondary border-primary/30 text-sm"
           data-testid="input-notes"
         />
@@ -333,7 +345,7 @@ export default function PDV() {
             min="0"
             placeholder="Desconto R$ (ex: 10.50)"
             value={manualDiscount}
-            onChange={(e) => setManualDiscount(e.target.value)}
+            onChange={handleDiscountChange}
             className="bg-secondary border-primary/30 text-sm flex-1"
             data-testid="input-discount"
           />
