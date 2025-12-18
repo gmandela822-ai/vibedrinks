@@ -8,73 +8,80 @@ interface AuthContextType {
   address: Address | null;
   role: UserRole | null;
   isAuthenticated: boolean;
+  isHydrated: boolean;
   login: (user: User, role: UserRole) => void;
   logout: () => void;
   setAddress: (address: Address) => void;
+  updateUser: (userData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+function getStoredValue<T>(key: string): T | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const saved = localStorage.getItem(key);
+    if (saved) {
+      return JSON.parse(saved) as T;
+    }
+  } catch {
+    // ignore parse errors
+  }
+  return null;
+}
+
+function getStoredString(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(key);
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('vibe-drinks-user');
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch {
-          return null;
-        }
-      }
-    }
-    return null;
-  });
-
-  const [address, setAddressState] = useState<Address | null>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('vibe-drinks-address');
-      if (saved) {
-        try {
-          return JSON.parse(saved);
-        } catch {
-          return null;
-        }
-      }
-    }
-    return null;
-  });
-
-  const [role, setRole] = useState<UserRole | null>(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('vibe-drinks-role');
-      return saved as UserRole | null;
-    }
-    return null;
-  });
+  const [isHydrated, setIsHydrated] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [address, setAddressState] = useState<Address | null>(null);
+  const [role, setRole] = useState<UserRole | null>(null);
 
   useEffect(() => {
+    const storedUser = getStoredValue<User>('vibe-drinks-user');
+    const storedAddress = getStoredValue<Address>('vibe-drinks-address');
+    const storedRole = getStoredString('vibe-drinks-role') as UserRole | null;
+    
+    if (storedUser) setUser(storedUser);
+    if (storedAddress) setAddressState(storedAddress);
+    if (storedRole) setRole(storedRole);
+    
+    setIsHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    
     if (user) {
       localStorage.setItem('vibe-drinks-user', JSON.stringify(user));
     } else {
       localStorage.removeItem('vibe-drinks-user');
     }
-  }, [user]);
+  }, [user, isHydrated]);
 
   useEffect(() => {
+    if (!isHydrated) return;
+    
     if (address) {
       localStorage.setItem('vibe-drinks-address', JSON.stringify(address));
     } else {
       localStorage.removeItem('vibe-drinks-address');
     }
-  }, [address]);
+  }, [address, isHydrated]);
 
   useEffect(() => {
+    if (!isHydrated) return;
+    
     if (role) {
       localStorage.setItem('vibe-drinks-role', role);
     } else {
       localStorage.removeItem('vibe-drinks-role');
     }
-  }, [role]);
+  }, [role, isHydrated]);
 
   const login = (userData: User, userRole: UserRole) => {
     setUser(userData);
@@ -91,6 +98,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setAddressState(addr);
   };
 
+  const updateUser = (userData: Partial<User>) => {
+    setUser(prev => prev ? { ...prev, ...userData } : null);
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -98,9 +109,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         address,
         role,
         isAuthenticated: !!user,
+        isHydrated,
         login,
         logout,
         setAddress,
+        updateUser,
       }}
     >
       {children}
