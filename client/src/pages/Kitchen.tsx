@@ -215,8 +215,8 @@ export default function Kitchen() {
     return null;
   };
 
-  // Filtrar APENAS categorias ICES e CERVEJAS
-  const allowedCategoryNames = ["ICES", "CERVEJAS"];
+  // Filtrar APENAS categorias ICE e CERVEJAS
+  const allowedCategoryNames = ["ICE", "CERVEJAS"];
   const allowedCategoryIds = new Set(
     categories
       .filter((c: { id: string; name: string }) => 
