@@ -12,7 +12,7 @@ import { useAuth } from '@/lib/auth';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { ExpandableOrderCard } from '@/components/ExpandableOrderCard';
 import type { Order, OrderItem, Product } from '@shared/schema';
-import { ORDER_TYPE_LABELS, type OrderStatus, type OrderType } from '@shared/schema';
+import { ORDER_TYPE_LABELS, type OrderStatus, type OrderType, PREPARED_CATEGORIES, isPreparedCategoryName } from '@shared/schema';
 import { useEffect, useState } from 'react';
 import {
   Dialog,
@@ -74,6 +74,10 @@ export default function Kitchen() {
 
   const { data: allProducts = [] } = useQuery<Product[]>({
     queryKey: ['/api/products'],
+  });
+
+  const { data: categories = [] } = useQuery<{ id: string; name: string }[]>({
+    queryKey: ['/api/categories'],
   });
 
   const orderIds = orders.map(o => o.id).join(',');
@@ -204,10 +208,19 @@ export default function Kitchen() {
     return null;
   };
 
-  const ingredientsToShow = allProducts.filter(p => 
-    p.name.toLowerCase().includes(ingredientSearch.toLowerCase()) && 
-    p.stock > 0
-  ).slice(0, 10);
+  const preparedCategoryIds = new Set(
+    categories
+      .filter((c: { id: string; name: string }) => isPreparedCategoryName(c.name))
+      .map((c: { id: string; name: string }) => c.id)
+  );
+
+  const ingredientsToShow = allProducts.filter(p => {
+    const isFromPreparedCategory = preparedCategoryIds.has(p.categoryId);
+    const matchesSearch = p.name.toLowerCase().includes(ingredientSearch.toLowerCase());
+    const hasStock = p.stock > 0;
+    
+    return matchesSearch && hasStock && !isFromPreparedCategory;
+  }).slice(0, 10);
 
   return (
     <div className="min-h-screen bg-background">
