@@ -27,7 +27,7 @@ export function Header({ onCartOpen }: HeaderProps) {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-black/90 backdrop-blur-xl border-b border-primary/10">
+    <header className="sticky top-0 z-50 bg-gradient-to-r from-yellow-400 to-yellow-500 backdrop-blur-xl border-none shadow-lg">
       <div className="max-w-7xl mx-auto px-4">
         <div className="flex items-center justify-between h-16 gap-4">
           <Link href="/" className="flex items-center gap-3 group">
@@ -43,7 +43,7 @@ export function Header({ onCartOpen }: HeaderProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="relative text-white/80 hover:text-primary hover:bg-primary/10"
+              className="relative text-gray-900 hover:text-black hover:bg-yellow-300 transition-colors"
               onClick={onCartOpen}
               data-testid="button-cart"
             >
@@ -57,7 +57,7 @@ export function Header({ onCartOpen }: HeaderProps) {
                     className="absolute -top-1 -right-1"
                   >
                     <Badge 
-                      className="h-5 min-w-5 flex items-center justify-center p-0 px-1 bg-gradient-to-r from-amber-500 to-yellow-500 text-black text-xs font-bold border-none"
+                      className="h-5 min-w-5 flex items-center justify-center p-0 px-1 bg-red-500 text-white text-xs font-bold border-none"
                       data-testid="badge-cart-count"
                     >
                       {itemCount}
@@ -71,7 +71,7 @@ export function Header({ onCartOpen }: HeaderProps) {
               <Button
                 variant="ghost"
                 size="icon"
-                className="text-white/80 hover:text-primary hover:bg-primary/10"
+                className="text-gray-900 hover:text-black hover:bg-yellow-300 transition-colors"
                 onClick={() => setLocation('/perfil')}
                 data-testid="button-profile"
               >
@@ -79,9 +79,9 @@ export function Header({ onCartOpen }: HeaderProps) {
               </Button>
             ) : (
               <Button
-                variant="outline"
+                variant="ghost"
                 size="sm"
-                className="text-primary border-primary/40 hover:bg-primary/10 hover:border-primary font-medium"
+                className="text-gray-900 font-medium hover:bg-yellow-300 transition-colors"
                 onClick={() => setLocation('/login')}
                 data-testid="button-login"
               >
@@ -91,18 +91,18 @@ export function Header({ onCartOpen }: HeaderProps) {
 
             <Link 
               href="/admin-login" 
-              className="text-muted-foreground/30 hover:text-primary/50 transition-colors p-2"
+              className="text-gray-700 hover:text-gray-900 transition-colors p-2"
             >
               <Settings className="h-4 w-4" />
             </Link>
 
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
-                <Button variant="ghost" size="icon" className="text-white/80" data-testid="button-menu">
+                <Button variant="ghost" size="icon" className="text-gray-900 hover:bg-yellow-300" data-testid="button-menu">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
-              <SheetContent side="right" className="bg-black/95 border-primary/20 backdrop-blur-xl w-80">
+              <SheetContent side="right" className="bg-gray-900 border-yellow-400/30 backdrop-blur-xl w-80">
                 <SheetHeader>
                   <SheetTitle className="sr-only">Menu</SheetTitle>
                 </SheetHeader>
@@ -113,8 +113,8 @@ export function Header({ onCartOpen }: HeaderProps) {
 
                   {isAuthenticated && (
                     <div className="space-y-1 mb-8">
-                      <p className="text-sm text-muted-foreground">Bem-vindo,</p>
-                      <p className="text-lg font-semibold text-primary">{user?.name}</p>
+                      <p className="text-sm text-gray-400">Bem-vindo,</p>
+                      <p className="text-lg font-semibold text-yellow-400">{user?.name}</p>
                     </div>
                   )}
 
@@ -123,24 +123,24 @@ export function Header({ onCartOpen }: HeaderProps) {
                       <>
                         <Link 
                           href="/perfil" 
-                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-primary/10 transition-colors"
+                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-yellow-500/10 transition-colors"
                           onClick={() => setMobileMenuOpen(false)}
                           data-testid="link-profile-mobile"
                         >
-                          <User className="h-5 w-5 text-primary" />
+                          <User className="h-5 w-5 text-yellow-400" />
                           Meu Perfil
                         </Link>
                         <Link 
                           href="/pedidos" 
-                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-primary/10 transition-colors"
+                          className="flex items-center gap-3 px-4 py-3 rounded-lg text-white hover:bg-yellow-500/10 transition-colors"
                           onClick={() => setMobileMenuOpen(false)}
                           data-testid="link-orders-mobile"
                         >
-                          <ShoppingCart className="h-5 w-5 text-primary" />
+                          <ShoppingCart className="h-5 w-5 text-yellow-400" />
                           Meus Pedidos
                         </Link>
                         
-                        <div className="my-4 border-t border-primary/10" />
+                        <div className="my-4 border-t border-yellow-400/10" />
                         
                         <Button 
                           variant="ghost" 
@@ -153,7 +153,7 @@ export function Header({ onCartOpen }: HeaderProps) {
                       </>
                     ) : (
                       <Button
-                        className="bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-semibold"
+                        className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-semibold hover:from-yellow-500 hover:to-yellow-600"
                         onClick={() => { setLocation('/login'); setMobileMenuOpen(false); }}
                       >
                         Entrar ou Cadastrar
@@ -162,9 +162,9 @@ export function Header({ onCartOpen }: HeaderProps) {
                   </nav>
 
                   {itemCount > 0 && (
-                    <div className="mt-auto pt-8 border-t border-primary/10">
+                    <div className="mt-auto pt-8 border-t border-yellow-400/10">
                       <Button
-                        className="w-full bg-gradient-to-r from-amber-500 to-yellow-500 text-black font-semibold"
+                        className="w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 font-semibold hover:from-yellow-500 hover:to-yellow-600"
                         onClick={() => { onCartOpen(); setMobileMenuOpen(false); }}
                       >
                         <ShoppingCart className="h-4 w-4 mr-2" />
