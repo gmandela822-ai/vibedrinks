@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, memo } from 'react';
 import { useLocation } from 'wouter';
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { 
@@ -243,7 +243,7 @@ export default function PDV() {
     setSalesperson(value as Salesperson);
   }, []);
 
-  const CartContent = () => (
+  const CartContentComponent = memo(() => (
     <div className="flex flex-col h-full">
       <div className="p-3 border-b border-border">
         <div className="flex items-center gap-2">
@@ -374,7 +374,7 @@ export default function PDV() {
         </Button>
       </div>
     </div>
-  );
+  ));
 
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
@@ -502,7 +502,7 @@ export default function PDV() {
         </main>
 
         <aside className="hidden lg:flex w-80 xl:w-96 bg-card border-l border-border flex-col">
-          <CartContent />
+          <CartContentComponent />
         </aside>
       </div>
 
@@ -530,7 +530,7 @@ export default function PDV() {
               </SheetTitle>
             </SheetHeader>
             <div className="h-[calc(100vh-4rem)]">
-              <CartContent />
+              <CartContentComponent />
             </div>
           </SheetContent>
         </Sheet>
