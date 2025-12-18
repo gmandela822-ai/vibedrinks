@@ -35,7 +35,7 @@ export default function Home() {
       };
       setLocation(redirectMap[role]);
     }
-  }, []);
+  }, [role, setLocation]);
 
   const { data: products = [], isLoading: productsLoading } = useQuery<Product[]>({
     queryKey: ['/api/products'],
@@ -64,10 +64,10 @@ export default function Home() {
     : selectedCategory;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background flex flex-col">
       <Header onCartOpen={() => setCartOpen(true)} />
       
-      <main>
+      <main className="flex-1 overflow-y-auto">
         <HeroSection />
         
         <BannerCarousel banners={banners} />
