@@ -243,6 +243,41 @@ export default function PDV() {
     setSalesperson(value as Salesperson);
   }, []);
 
+  const NotesAndDiscountInputs = memo(({
+    notes,
+    manualDiscount,
+    onNoteChange,
+    onDiscountChange,
+  }: {
+    notes: string;
+    manualDiscount: string;
+    onNoteChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+    onDiscountChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  }) => (
+    <>
+      <Input
+        placeholder="Observações..."
+        value={notes}
+        onChange={onNoteChange}
+        className="bg-secondary border-primary/30 text-sm"
+        data-testid="input-notes"
+      />
+      <div className="flex items-center gap-2">
+        <Percent className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+        <Input
+          type="number"
+          step="0.01"
+          min="0"
+          placeholder="Desconto R$ (ex: 10.50)"
+          value={manualDiscount}
+          onChange={onDiscountChange}
+          className="bg-secondary border-primary/30 text-sm flex-1"
+          data-testid="input-discount"
+        />
+      </div>
+    </>
+  ));
+
   const CartContentComponent = memo(() => (
     <div className="flex flex-col h-full">
       <div className="p-3 border-b border-border">
@@ -324,31 +359,16 @@ export default function PDV() {
       </div>
 
       <div className="p-3 border-t border-border space-y-2">
-        <Input
-          placeholder="Observações..."
-          value={notes}
-          onChange={handleNoteChange}
-          className="bg-secondary border-primary/30 text-sm"
-          data-testid="input-notes"
+        <NotesAndDiscountInputs
+          notes={notes}
+          manualDiscount={manualDiscount}
+          onNoteChange={handleNoteChange}
+          onDiscountChange={handleDiscountChange}
         />
 
         <div className="flex justify-between text-sm">
           <span>Subtotal:</span>
           <span className="font-bold">{formatCurrency(subtotal)}</span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Percent className="h-4 w-4 text-muted-foreground flex-shrink-0" />
-          <Input
-            type="number"
-            step="0.01"
-            min="0"
-            placeholder="Desconto R$ (ex: 10.50)"
-            value={manualDiscount}
-            onChange={handleDiscountChange}
-            className="bg-secondary border-primary/30 text-sm flex-1"
-            data-testid="input-discount"
-          />
         </div>
 
         {discountValue > 0 && (
